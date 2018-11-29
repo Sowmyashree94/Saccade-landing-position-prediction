@@ -11,6 +11,10 @@ from scipy import interpolate, optimize
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import time
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+
+timee = time.time()
 
 LeftGazePosition2dX = 0
 LeftGazePosition2dY= 1
@@ -38,12 +42,11 @@ Vd = 130
 Va = 30
 Vf = 30
 
-file = "/Users/niteeshmidlagajni/Downloads/Dataset-Original/P05_Recording.npy"
-file1 = "/Users/niteeshmidlagajni/Documents/University/Third_sem/HCI/Docs/Saarland_data/Supplementary/DATA/GazeData/01_copy.tsv"
 
-data = np.loadtxt(file1, delimiter='|')
 
-data1 = np.load(file)
+file = "/home/niteesh/Documents/uni/HCI/Saarland/Supplementary/DATA/GazeData/01.tsv"
+data = np.genfromtxt(file, skip_header=1, delimiter='|')
+
 
 sampl_Freq = 300
 window_length = 5
@@ -52,12 +55,12 @@ window_length = 5
 #
 gazePosX_avg = (data[:,LeftGazePosition3dX]+data[:,RightGazePosition3dX])/2
 gazePosY_avg = (data[:,LeftGazePosition3dY]+data[:,RightGazePosition3dY])/2
+gazePosZ_avg = (data[:,LeftGazePosition3dZ]+data[:,RightGazePosition3dZ])/2
+gaze_coordinates_3d = np.column_stack((gazePosX_avg,gazePosY_avg,gazePosZ_avg))
+
 
 eyePosX_avg = (data[:,LeftEyePosition3dX]+data[:,RightEyePosition3dX])/2
 eyePosY_avg = (data[:,LeftEyePosition3dY]+data[:,RightEyePosition3dY])/2
-
-gazePosZ_avg = (data[:,LeftGazePosition3dZ]+data[:,RightGazePosition3dZ])/2
-gaze_coordinates_3d = np.column_stack((gazePosX_avg,gazePosY_avg,gazePosZ_avg))
 eyePosZ_avg = (data[:,LeftEyePosition3dZ]+data[:,RightEyePosition3dZ])/2
 eye_coordinates_3d = np.column_stack((eyePosX_avg,eyePosY_avg, eyePosZ_avg))
 
@@ -151,7 +154,7 @@ print(count)
 
 #---------------------------------------------------------------------------------------------
 
-num = 50
+num = 350
 
 indices_range = [int(saccade_indices[num,1]),int(saccade_indices[num,2])]
 
@@ -167,27 +170,36 @@ for xc,c,l in zip(xcoords,colors,labels):
     plt.axvline(x=xc, label=l, c=c)
 
 plt.legend()
-
 plt.xlabel("Time in Microseconds")
 plt.ylabel("Velocity in degrees/second")
-
 plt.show()
+
+#fig = plt.figure()
+#ax = fig.add_subplot(111)
+#ax.plot(time_stamps_cut[500:1000,],velocity_filtered[500:1000],)
+#plt.title("Velocity plot with filtered data")
+#plt.xlabel("Time in Microseconds")
+#plt.ylabel("Velocity in degrees/second")
+#plt.show()
+#
+#
+#fig = plt.figure()
+#ax = fig.add_subplot(111)
+#ax.plot(time_stamps_cut[500:1000,],velocity[500:1000],)
+#plt.title("Velocity plot with raw data")
+#plt.xlabel("Time in Microseconds")
+#plt.ylabel("Velocity in degrees/second")
+#plt.show()
 
 fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.plot(time_stamps_cut[500:1000,],velocity_filtered[500:1000],)
-plt.title("Velocity plot with filtered data")
-plt.xlabel("Time in Microseconds")
-plt.ylabel("Velocity in degrees/second")
-
+ax = fig.add_subplot(111, projection='3d')
+X = data[indices_range[0]-10:indices_range[1]+10,LeftGazePosition3dX]
+Y = data[indices_range[0]-10:indices_range[1]+10,LeftGazePosition3dY]
+Z = data[indices_range[0]-10:indices_range[1]+10,LeftGazePosition3dZ]
+ax.plot(X,Y,Z)
+plt.title("gaze data")
 plt.show()
 
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.plot(time_stamps_cut[500:1000,],velocity[500:1000],)
-plt.title("Velocity plot with raw data")
-plt.xlabel("Time in Microseconds")
-plt.ylabel("Velocity in degrees/second")
 
-plt.show()
+print("TIME   ",time.time() - timee)
