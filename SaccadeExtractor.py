@@ -39,7 +39,7 @@ Va = 30
 Vf = 30
 
 file = "/Users/niteeshmidlagajni/Downloads/Dataset-Original/P05_Recording.npy"
-file1 = "/Users/niteeshmidlagajni/Documents/University/Third_sem/HCI/Docs/Saarland_data/Supplementary/DATA/GazeData/05_copy.tsv"
+file1 = "/Users/niteeshmidlagajni/Documents/University/Third_sem/HCI/Docs/Saarland_data/Supplementary/DATA/GazeData/01_copy.tsv"
 
 data = np.loadtxt(file1, delimiter='|')
 
