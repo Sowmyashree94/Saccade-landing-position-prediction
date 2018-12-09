@@ -93,7 +93,7 @@ for f in files:
         pass      
     
     ##-----------------------------------------------------------------------
-    velocity_filtered =savgol_filter(velocity,9,3)
+    velocity_filtered =savgol_filter(velocity,13,3)
 
     
     velocities_allUsrs.append(velocity_filtered)
@@ -161,7 +161,7 @@ for f in files:
 
            
     print("saccades",count)     
-#    print("Not saccades",count_notsaccades)           
+    print("Not saccades",count_notsaccades)        
                 
 
 
