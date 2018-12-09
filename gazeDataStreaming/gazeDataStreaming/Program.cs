@@ -12,10 +12,10 @@ namespace eyexTracking
             p.eyeTracker_Host(host);
             Console.In.Read();
         }
-
         //------------------------Host-------------------------------
         public void eyeTracker_Host(Host host)
         {
+
             System.Timers.Timer t = new System.Timers.Timer(60000);
             t.Elapsed += (s, e) => timerStop(host, e, t);
             t.Enabled = true;
