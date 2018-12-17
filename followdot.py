@@ -1,9 +1,16 @@
 import pygame
 import sys
 import random
+from subprocess import Popen, PIPE, STDOUT
+import time
+from copy import deepcopy
 
+timee = time.time()
 pygame.init()
 offset = 50
+record_time = 62
+
+
 screen_resolution = (1920, 1080)
 mid_x = int(screen_resolution[0]/2)
 mid_y = int(screen_resolution[1]/2)
@@ -17,29 +24,36 @@ screen_color = (255,255,255)
 dot_color = (255,0,0)
 radius = 15
 thickness = 15
-
+f = open(r"C:\Users\Niteesh\Desktop\g_truth.txt",'w')
 points = [(offset,offset), (max_x,max_y), (max_x, offset), (offset, max_y), (mid_x, mid_y), (offset, mid_y), (mid_x, offset), (mid_x, max_y), (max_x, mid_y)]
 print(points)
-#for mode in pygame.display.list_modes():
-#	print(mode)
-i = 0
+p = random.choice(points)
+pygame.mouse.set_visible(False)
 while (1):
 	
-	try:    
+	try:
+		if time.time() - timee > record_time:
+				pygame.quit()
+				f.close()
+				sys.exit()
 		screen.fill(screen_color)
-		x,y = random.choice(points)
-		#x, y = points[i]		
-		#print (x,y)		
-		pygame.draw.circle(screen, dot_color, (x, y), radius, thickness)
+		p1 = random.choice(points)
+		while(p == p1):
+ 				p1 = random.choice(points)
+ 				print("I am here ",p1,p)
+ 				
+		p = p1		
+		f.writelines(str(p[0])+ "|" + str(p[1])+ "\n")
+		pygame.draw.circle(screen, dot_color, p, radius, thickness)
 		pygame.display.update()
 		pygame.time.delay(3000)
-		#i += 1
-		#if i == len(points):
-		#	i = 0
+
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
 				print ("Key press")				
 				pygame.quit()
+				f.close()
+				sys.exit()
 	except Exception as e:
-		pygame.quit()		
-		
+		print(e)
+		pygame.quit()
