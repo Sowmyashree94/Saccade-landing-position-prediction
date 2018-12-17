@@ -23,7 +23,7 @@ Vd = 130
 Va = 60
 Vf = 60
 sampl_Freq = 65
-window_length = 5       
+window_length = 3       
 display = [1920,1080]                                                                                                                                                                              
 
 distance_frmMonitor = 63 #in cm
@@ -33,7 +33,7 @@ dispHoriRes = 1920
 deg_per_px = math.degrees(math.atan2(.5*ScreenWidth, distance_frmMonitor)) / (.5*dispHoriRes)
 
 
-data_dir = r"C:\Stuffs\Sowmya_data\Trial2"
+data_dir = r"/home/niteesh/Documents/uni/HCI/HCI/Niteesh_data/Trial1"
 files = os.listdir(data_dir)
 files.sort()
 
@@ -228,5 +228,5 @@ plt.show()
 
 saccade_length = SaccadeIndices_allUsrs[user][:,2] - SaccadeIndices_allUsrs[user][:,1]
 print("\n\nAverage saccade duration is %f samples with a high of %i and low of %i\n"%(saccade_length.mean(),saccade_length.max(),saccade_length.min()))
-time_per_sample = (1/65)*1000 #ms
+time_per_sample = (1/sampl_Freq)*1000 #ms
 print("Average saccade duration in time is %fms with a high of %ims and low of %ims\n"%(saccade_length.mean()*time_per_sample,saccade_length.max()*time_per_sample,saccade_length.min()*time_per_sample))
