@@ -41,7 +41,7 @@ Va = 30
 Vf = 30
 
 #file = "/Users/niteeshmidlagajni/Downloads/Dataset-Original/P05_Recording.npy"
-file = "/Users/niteeshmidlagajni/Documents/University/Third_sem/HCI/Docs/Saarland_data/Supplementary/DATA/GazeData/01.tsv"
+file = "/home/niteesh/Documents/uni/HCI/Saarland/Supplementary/DATA/GazeData/01.tsv"
 
 data = np.genfromtxt(file, skip_header=1, delimiter='|')
 
@@ -49,11 +49,11 @@ data = np.genfromtxt(file, skip_header=1, delimiter='|')
 sampl_Freq = 300
 window_length = 5
 distance_frmMonitor = 70 #in cm
-ScreenWidth = 34.296 #cms excluding bezel width
+ScreenWidth = 60.77 #cms excluding bezel width
 dispHoriRes = 2560
 
 deg_per_px = degrees(atan2(.5*ScreenWidth, distance_frmMonitor)) / (.5*dispHoriRes)
-   
+ 
 gazePosX_avg = ((data[:,LeftGazePosition2dX]+data[:,RightGazePosition2dX])/2)*display[0]
 
 gazePosY_avg = ((data[:,LeftGazePosition2dY]+data[:,RightGazePosition2dY])/2)*display[1]
