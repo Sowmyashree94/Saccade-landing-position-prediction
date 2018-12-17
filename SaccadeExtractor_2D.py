@@ -43,11 +43,13 @@ Vd = 130
 Va = 60
 Vf = 60
 sampl_Freq = 300
-window_length = 5       
-display = [2560,1440]                                                                                                                                                                              
+window_length = 5    
+num_samples_train = 15   
+display = [2560,1440]   
+                                                                                                                                                                           
 
 distance_frmMonitor = 70 #in cm
-ScreenWidth = 34.296 #cms excluding bezel width
+ScreenWidth = 60.77 #cms excluding bezel width
 dispHoriRes = 2560
 
 deg_per_px = math.degrees(math.atan2(.5*ScreenWidth, distance_frmMonitor)) / (.5*dispHoriRes)
@@ -60,6 +62,10 @@ files.sort()
 velocities_allUsrs = [] #contains velocities from all users, length is # of users
 SaccadeIndices_allUsrs = [] #contains saccade indices from all users, length is # of users
 SaccadeTimeStamps_allUsrs = [] #contains time_stamps from all users, length is # of users
+
+data_out_dir = "/home/niteesh/Documents/uni/HCI/Saarland/Npy_files/"
+subject_count = 1
+
 
 for f in files:
     file = data_dir + "/" + f
@@ -93,7 +99,7 @@ for f in files:
         pass      
     
     ##-----------------------------------------------------------------------
-    velocity_filtered =savgol_filter(velocity,13,3)
+    velocity_filtered =savgol_filter(velocity,9,3)
 
     
     velocities_allUsrs.append(velocity_filtered)
@@ -158,10 +164,26 @@ for f in files:
     
     SaccadeIndices_allUsrs.append(saccade_indices)
     SaccadeTimeStamps_allUsrs.append(saccade_timeStamps)
+    
+    data_out = np.array([])
+    for e in range(0,len(saccade_indices)):
+        temp_stream = gaze_coordinates_2d[int(saccade_indices[e,0])-offset:int(saccade_indices[e,2]-offset+1)]
+        if(temp_stream.shape[0] >= num_samples_train):
+            temp_stream = temp_stream[0:num_samples_train]
+        else:
+            temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(np.nan,))
+        temp_stream = temp_stream.reshape((1,num_samples_train,2))
+        if e != 0:
+            data_out = np.vstack((data_out,temp_stream))
+        else:
+            data_out = np.copy(temp_stream)
+    np.save(data_out_dir+str(subject_count),data_out)
+    subject_count += 1
+        
 
            
     print("saccades",count)     
-    print("Not saccades",count_notsaccades)        
+#    print("Not saccades",count_notsaccades)        
                 
 
 
@@ -213,5 +235,13 @@ ax = fig.add_subplot(111)
 ax.hist(velocities_allUsrs[user][indices_range[0]:indices_range[1]])
 plt.show()
 
+saccade_length = SaccadeIndices_allUsrs[user][:,2] - SaccadeIndices_allUsrs[user][:,0]
+print("\n\nAverage saccade duration is %f samples with a high of %i and low of %i\n"%(saccade_length.mean(),saccade_length.max(),saccade_length.min()))
+time_per_sample = (1/sampl_Freq)*1000 #ms
+print("Average saccade duration in time is %fms with a high of %ims and low of %ims\n"%(saccade_length.mean()*time_per_sample,saccade_length.max()*time_per_sample,saccade_length.min()*time_per_sample))
 
 print("TIME   ",time.time() - timee)
+
+#---------------------------------------------------------------------------------------------
+
+
