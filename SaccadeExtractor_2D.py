@@ -171,7 +171,7 @@ for f in files:
         if(temp_stream.shape[0] >= num_samples_train):
             temp_stream = temp_stream[0:num_samples_train]
         else:
-            temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(np.nan,))
+            temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(np.inf,))
         temp_stream = np.vstack((temp_stream, gaze_coordinates_2d[int(saccade_indices[e,2]-offset+1)]))
         temp_stream = temp_stream.reshape((1,num_samples_train+1,2))
         if e != 0:
