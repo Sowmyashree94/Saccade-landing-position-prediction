@@ -66,6 +66,7 @@ SaccadeTimeStamps_allUsrs = [] #contains time_stamps from all users, length is #
 data_out_dir = "/home/niteesh/Documents/uni/HCI/Saarland/Npy_files/"
 subject_count = 1
 
+files = [files[10]]
 
 for f in files:
     file = data_dir + "/" + f
@@ -155,8 +156,8 @@ for f in files:
                     try:
                         saccade_timeStamps = np.hstack((saccade_timeStamps,temp_tstamps))
                         saccade_indices = np.hstack((saccade_indices,temp_indices))
-                    except:
-                        pass
+                    except Exception as e:
+                        print(e,saccade_indices.shape,temp_indices.shape)
             else:
                 count_notsaccades +=1
         i += 1
@@ -172,7 +173,8 @@ for f in files:
             temp_stream = temp_stream[0:num_samples_train]
         else:
             temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(np.nan,))
-        temp_stream = temp_stream.reshape((1,num_samples_train,2))
+        temp_stream = np.vstack((temp_stream, gaze_coordinates_2d[int(saccade_indices[e,2]-offset+1)]))
+        temp_stream = temp_stream.reshape((1,num_samples_train+1,2))
         if e != 0:
             data_out = np.vstack((data_out,temp_stream))
         else:
@@ -182,7 +184,8 @@ for f in files:
         
 
            
-    print("saccades",count)     
+    print("saccades",count)  
+    print("indices",len(saccade_indices))
 #    print("Not saccades",count_notsaccades)        
                 
 
@@ -194,33 +197,33 @@ user = 0
 #
 indices_range = [int(SaccadeIndices_allUsrs[user][num,1]),int(SaccadeIndices_allUsrs[user][num,2])]
 #
-fig = plt.figure()
-ax = fig.add_subplot(111)
-#ax.plot(time_stamps_cut[indices_range[0]-10:indices_range[1]+10] , velocity_filtered[indices_range[0]-10:indices_range[1]+10])
-#ax.plot(velocities_allUsrs[user][indices_range[0]-10:indices_range[1]+10])
-ax.plot(velocities_allUsrs[user][indices_range[0]:indices_range[1]])
-
-#xcoords = [SaccadeTimeStamps_allUsrs[user][num,0], SaccadeTimeStamps_allUsrs[user][num,1], SaccadeTimeStamps_allUsrs[user][num,2]]
-#colors = ['r','k','b']
-#labels =['Detection pt Vd = %i deg/s'%Vd,'Anchor pt Va = %i deg/s'%Va,'Final pt Vf = %i deg/s'%Vf]
-
-#for xc,c,l in zip(xcoords,colors,labels):
-#    plt.axvline(x=xc, label=l, c=c)
-
-#plt.legend()
-plt.xlabel("Time in Microseconds")
-plt.ylabel("Velocity in degrees/second")
-plt.show()
+#fig = plt.figure()
+#ax = fig.add_subplot(111)
+##ax.plot(time_stamps_cut[indices_range[0]-10:indices_range[1]+10] , velocity_filtered[indices_range[0]-10:indices_range[1]+10])
+##ax.plot(velocities_allUsrs[user][indices_range[0]-10:indices_range[1]+10])
+#ax.plot(velocities_allUsrs[user][indices_range[0]:indices_range[1]])
 #
-##fig = plt.figure()
-##ax = fig.add_subplot(111)
-##ax.plot(time_stamps_cut[500:1000,],velocity_filtered[500:1000],)
-##plt.title("Velocity plot with filtered data")
-##plt.xlabel("Time in Microseconds")
-##plt.ylabel("Velocity in degrees/second")
-##plt.show()
+##xcoords = [SaccadeTimeStamps_allUsrs[user][num,0], SaccadeTimeStamps_allUsrs[user][num,1], SaccadeTimeStamps_allUsrs[user][num,2]]
+##colors = ['r','k','b']
+##labels =['Detection pt Vd = %i deg/s'%Vd,'Anchor pt Va = %i deg/s'%Va,'Final pt Vf = %i deg/s'%Vf]
+#
+##for xc,c,l in zip(xcoords,colors,labels):
+##    plt.axvline(x=xc, label=l, c=c)
+#
+##plt.legend()
+#plt.xlabel("Time in Microseconds")
+#plt.ylabel("Velocity in degrees/second")
+#plt.show()
 ##
-##
+###fig = plt.figure()
+###ax = fig.add_subplot(111)
+###ax.plot(time_stamps_cut[500:1000,],velocity_filtered[500:1000],)
+###plt.title("Velocity plot with filtered data")
+###plt.xlabel("Time in Microseconds")
+###plt.ylabel("Velocity in degrees/second")
+###plt.show()
+###
+###
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(velocities_allUsrs[user])
@@ -228,12 +231,12 @@ plt.title("Velocity plot with raw data")
 plt.xlabel("Time in Microseconds")
 plt.ylabel("Velocity in degrees/second")
 plt.show()
-
-
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.hist(velocities_allUsrs[user][indices_range[0]:indices_range[1]])
-plt.show()
+#
+#
+#fig = plt.figure()
+#ax = fig.add_subplot(111)
+#ax.hist(velocities_allUsrs[user][indices_range[0]:indices_range[1]])
+#plt.show()
 
 saccade_length = SaccadeIndices_allUsrs[user][:,2] - SaccadeIndices_allUsrs[user][:,0]
 print("\n\nAverage saccade duration is %f samples with a high of %i and low of %i\n"%(saccade_length.mean(),saccade_length.max(),saccade_length.min()))
