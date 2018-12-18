@@ -66,7 +66,6 @@ SaccadeTimeStamps_allUsrs = [] #contains time_stamps from all users, length is #
 data_out_dir = "/home/niteesh/Documents/uni/HCI/Saarland/Npy_files/"
 subject_count = 1
 
-files = [files[10]]
 
 for f in files:
     file = data_dir + "/" + f
