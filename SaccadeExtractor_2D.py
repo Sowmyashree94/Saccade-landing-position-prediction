@@ -43,8 +43,7 @@ Vd = 130
 Va = 60
 Vf = 60
 sampl_Freq = 300
-window_length = 5    
-num_samples_train = 15   
+window_length = 5   
 display = [2560,1440]   
                                                                                                                                                                            
 
@@ -67,6 +66,8 @@ SaccadeTimeStamps_allUsrs = [] #contains time_stamps from all users, length is #
 data_out_dir = "/home/niteesh/Documents/uni/HCI/Saarland/Npy_files/"
 subject_count = 1
 
+min_saccade_samples = 13 #With this parameter, only saccades longer than it are recorded
+num_samples_train = 10 #For every saccade, only first num_samples_train are stored in npy file for training
 
 for f in files:
     file = data_dir + "/" + f
@@ -175,6 +176,11 @@ for f in files:
                 count_notsaccades +=1
         i += 1
     
+    #take saccades with minimn number of samples equals 10 
+    temp_numSamples = saccade_indices[:,2] -saccade_indices[:,0]
+    mask1 = temp_numSamples >= min_saccade_samples
+    saccade_indices = saccade_indices[mask1]
+
     
     SaccadeIndices_allUsrs.append(saccade_indices)
     SaccadeTimeStamps_allUsrs.append(saccade_timeStamps)
@@ -185,6 +191,7 @@ for f in files:
         if(temp_stream.shape[0] >= num_samples_train):
             temp_stream = temp_stream[0:num_samples_train]
         else:
+            #this case will not come when mask applied for min saccade length
             temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(np.inf,))
         temp_stream = np.vstack((temp_stream, gaze_coordinates_2d1[int(saccade_indices[e,2]-offset+1)]))
         temp_stream = temp_stream.reshape((1,num_samples_train+1,2))
@@ -195,10 +202,7 @@ for f in files:
     np.save(data_out_dir+str(subject_count),data_out)
     subject_count += 1
         
-
-           
-    print("saccades",count)  
-    print("indices",len(saccade_indices))
+    print("saccades",saccade_indices.shape[0])  
 #    print("Not saccades",count_notsaccades)        
                 
 
