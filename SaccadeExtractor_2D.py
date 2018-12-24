@@ -81,16 +81,15 @@ for f in files:
     
     gaze_coordinates_2d = np.column_stack((gazePosX_avg,gazePosY_avg))
     gaze_coordinates_2d1 = np.column_stack((gazePosX_avg1,gazePosY_avg1))
- 
-    #removing values outside range 0 and 1
+
+    #take only in range 0 to 1    
     mask = (gaze_coordinates_2d1 >= 0) & (gaze_coordinates_2d1 <= 1)
     for i,m in enumerate(mask):
         mask[i] = m.all()
     mask = mask[:,0]
     gaze_coordinates_2d1 =gaze_coordinates_2d1[mask]
     gaze_coordinates_2d =gaze_coordinates_2d[mask]
-
-
+    
     time_stamps = data[:,Timestamp]
     
     velocity = np.array([])
@@ -136,6 +135,8 @@ for f in files:
             temp_indices = np.array([i])
             found = False
             for j in range(i-1,i-num_samples_anchor,-1):
+                if j < 0:
+                    break
                 if (velocity_filtered[j]==Va):
                     count +=1
                     found = True
@@ -171,30 +172,34 @@ for f in files:
                         saccade_timeStamps = np.hstack((saccade_timeStamps,temp_tstamps))
                         saccade_indices = np.hstack((saccade_indices,temp_indices))
                     except Exception as e:
-                        print(e,saccade_indices.shape,temp_indices.shape)
+                       # print(e,saccade_indices.shape,temp_indices.shape)
+                       pass
             else:
                 count_notsaccades +=1
         i += 1
-    
+
     #take saccades with minimn number of samples equals 10 
     temp_numSamples = saccade_indices[:,2] -saccade_indices[:,0]
     mask1 = temp_numSamples >= min_saccade_samples
     saccade_indices = saccade_indices[mask1]
-
     
     SaccadeIndices_allUsrs.append(saccade_indices)
     SaccadeTimeStamps_allUsrs.append(saccade_timeStamps)
     
     data_out = np.array([])
     for e in range(0,len(saccade_indices)):
-        temp_stream = gaze_coordinates_2d1[int(saccade_indices[e,0])-offset:int(saccade_indices[e,2]-offset+1)]
+        start = int(saccade_indices[e,0])
+        end = int(saccade_indices[e,2])
+        temp_stream = gaze_coordinates_2d1[start-offset:end-offset+1]
+        temp_stream = np.hstack((temp_stream, velocity_filtered[start:end+1].reshape((temp_stream.shape[0],1))))
         if(temp_stream.shape[0] >= num_samples_train):
             temp_stream = temp_stream[0:num_samples_train]
         else:
             #this case will not come when mask applied for min saccade length
             temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(np.inf,))
-        temp_stream = np.vstack((temp_stream, gaze_coordinates_2d1[int(saccade_indices[e,2]-offset+1)]))
-        temp_stream = temp_stream.reshape((1,num_samples_train+1,2))
+        temp_last = np.append(gaze_coordinates_2d1[end-offset+1],0)
+        temp_stream = np.vstack((temp_stream, temp_last))
+        temp_stream = temp_stream.reshape((1,num_samples_train+1,3))
         if e != 0:
             data_out = np.vstack((data_out,temp_stream))
         else:
@@ -202,6 +207,8 @@ for f in files:
     np.save(data_out_dir+str(subject_count),data_out)
     subject_count += 1
         
+
+           
     print("saccades",saccade_indices.shape[0])  
 #    print("Not saccades",count_notsaccades)        
                 
