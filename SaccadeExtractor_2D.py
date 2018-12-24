@@ -59,6 +59,7 @@ data_dir = "/home/niteesh/Documents/uni/HCI/Saarland/Supplementary/DATA/GazeData
 files = os.listdir(data_dir)
 files.sort()
 
+
 velocities_allUsrs = [] #contains velocities from all users, length is # of users
 SaccadeIndices_allUsrs = [] #contains saccade indices from all users, length is # of users
 SaccadeTimeStamps_allUsrs = [] #contains time_stamps from all users, length is # of users
@@ -74,8 +75,21 @@ for f in files:
     gazePosX_avg = ((data[:,LeftGazePosition2dX]+data[:,RightGazePosition2dX])/2)*display[0]
     gazePosY_avg = ((data[:,LeftGazePosition2dY]+data[:,RightGazePosition2dY])/2)*display[1]
 
-    gaze_coordinates_2d = np.column_stack((gazePosX_avg,gazePosY_avg))
+    gazePosX_avg1 = ((data[:,LeftGazePosition2dX]+data[:,RightGazePosition2dX])/2)
+    gazePosY_avg1 = ((data[:,LeftGazePosition2dY]+data[:,RightGazePosition2dY])/2)
     
+    gaze_coordinates_2d = np.column_stack((gazePosX_avg,gazePosY_avg))
+    gaze_coordinates_2d1 = np.column_stack((gazePosX_avg1,gazePosY_avg1))
+ 
+    #removing values outside range 0 and 1
+    mask = (gaze_coordinates_2d1 >= 0) & (gaze_coordinates_2d1 <= 1)
+    for i,m in enumerate(mask):
+        mask[i] = m.all()
+    mask = mask[:,0]
+    gaze_coordinates_2d1 =gaze_coordinates_2d1[mask]
+    gaze_coordinates_2d =gaze_coordinates_2d[mask]
+
+
     time_stamps = data[:,Timestamp]
     
     velocity = np.array([])
@@ -167,12 +181,12 @@ for f in files:
     
     data_out = np.array([])
     for e in range(0,len(saccade_indices)):
-        temp_stream = gaze_coordinates_2d[int(saccade_indices[e,0])-offset:int(saccade_indices[e,2]-offset+1)]
+        temp_stream = gaze_coordinates_2d1[int(saccade_indices[e,0])-offset:int(saccade_indices[e,2]-offset+1)]
         if(temp_stream.shape[0] >= num_samples_train):
             temp_stream = temp_stream[0:num_samples_train]
         else:
             temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(np.inf,))
-        temp_stream = np.vstack((temp_stream, gaze_coordinates_2d[int(saccade_indices[e,2]-offset+1)]))
+        temp_stream = np.vstack((temp_stream, gaze_coordinates_2d1[int(saccade_indices[e,2]-offset+1)]))
         temp_stream = temp_stream.reshape((1,num_samples_train+1,2))
         if e != 0:
             data_out = np.vstack((data_out,temp_stream))
