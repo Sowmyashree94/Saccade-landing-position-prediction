@@ -5,7 +5,6 @@ import time
 from win32api import GetSystemMetrics
 import math
 import numpy as np
-# from copy import deepcopy
 
 timee = time.time()
 pg.init()
@@ -24,7 +23,7 @@ dot_color = (255,0,0)
 line_color = (0,10,10)
 radius = 15
 thickness = 15
-length = 30
+length_direction = 30
 
 try:
     f = open(r'D:\g_truth.txt','w')
@@ -34,14 +33,20 @@ points = [(offset,offset), (max_x,max_y), (max_x, offset), (offset, max_y), (mid
 print(points)
 
 
-def arrow_end_point(a,b, c,d):
-#    print ("in function")
-    alpha = length/math.sqrt(math.pow((c-a),2)+math.pow((d-b),2) )
+def arrowline_end_point(a,b, c,d):
+    alpha = length_direction/math.sqrt(math.pow((c-a),2)+math.pow((d-b),2) )
     x = c +alpha*(a - c)
     y = d +alpha*(b - d)
     return int(x),int(y)
+    
+def draw_arrow(screen, colour, start, end):
+    radius_1 = 8
+    rot_val = 120
+    pg.draw.line(screen,colour,start,end,2)
+    rotation = math.degrees(math.atan2(start[1]-end[1], end[0]-start[0]))+90
+    pg.draw.polygon(screen, colour, ((end[0]+radius_1*math.sin(math.radians(rotation)), end[1]+radius_1*math.cos(math.radians(rotation))), (end[0]+radius_1*math.sin(math.radians(rotation-rot_val)), end[1]+radius_1*math.cos(math.radians(rotation-rot_val))), (end[0]+radius_1*math.sin(math.radians(rotation+rot_val)), end[1]+radius_1*math.cos(math.radians(rotation+rot_val)))))
+   
 
-# i = 0
 x1, y1 = random.choice(points)
 while (1):
     try:
@@ -57,14 +62,11 @@ while (1):
             x,y = random.choice(points)
         try:
             pg.draw.circle(screen, dot_color, (x1, y1), radius, thickness)
-            # (((x+x1)/2),((y+y1)/2))
-            (new_x, new_y) = arrow_end_point(x,y,x1,y1)
-            # print("function call ",new_x, new_y, x1, y1, x, y)
-            pg.draw.lines(screen, line_color, False, [(x1,y1), (new_x, new_y)], 3)
+            (new_x, new_y) = arrowline_end_point(x,y,x1,y1)
+            draw_arrow(screen, line_color, (x1,y1),(new_x, new_y))
             pg.display.update()
             pg.time.delay(500)
             screen.fill(screen_color)
-            
             x1,y1 = (x,y)
         except Exception as e:
             print("Exception here",e)
