@@ -179,9 +179,9 @@ for f in files:
         i += 1
 
     #take saccades with minimn number of samples equals 10 
-    temp_numSamples = saccade_indices[:,2] -saccade_indices[:,0]
-    mask1 = temp_numSamples >= min_saccade_samples
-    saccade_indices = saccade_indices[mask1]
+#    temp_numSamples = saccade_indices[:,2] -saccade_indices[:,0]
+#    mask1 = temp_numSamples >= min_saccade_samples
+#    saccade_indices = saccade_indices[mask1]
     
     SaccadeIndices_allUsrs.append(saccade_indices)
     SaccadeTimeStamps_allUsrs.append(saccade_timeStamps)
@@ -196,7 +196,7 @@ for f in files:
             temp_stream = temp_stream[0:num_samples_train]
         else:
             #this case will not come when mask applied for min saccade length
-            temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(np.inf,))
+            temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(100,))
         temp_last = np.append(gaze_coordinates_2d1[end-offset+1],0)
         temp_stream = np.vstack((temp_stream, temp_last))
         temp_stream = temp_stream.reshape((1,num_samples_train+1,3))
