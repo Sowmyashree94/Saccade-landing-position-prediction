@@ -13,6 +13,7 @@ import math
 import matplotlib.pyplot as plt
 import time
 from mpl_toolkits.mplot3d.axes3d import Axes3D
+import filepath
 
 timee = time.time()
 
@@ -30,10 +31,13 @@ distance_frmMonitor = 63 #in cm
 ScreenWidth = 53 #cms excluding bezel width
 dispHoriRes = 1920
 
+min_saccade_samples = 10 #With this parameter, only saccades longer than it are recorded
+num_samples_train = 10 #For every saccade, only first num_samples_train are stored in npy file for training
+
 deg_per_px = math.degrees(math.atan2(.5*ScreenWidth, distance_frmMonitor)) / (.5*dispHoriRes)
 
 
-data_dir = r"/home/niteesh/Documents/uni/HCI/HCI/Niteesh_data/Trial1"
+data_dir = filepath.filepath_eyeX
 files = os.listdir(data_dir)
 files.sort()
 
@@ -43,12 +47,17 @@ SaccadeTimeStamps_allUsrs = [] #contains time_stamps from all users, length is #
 
 #for f in files:
 #file = data_dir + "/" + f
-file = data_dir + "/" + "data_test.txt"
+#file = data_dir + "/" + "data_test_07012019_18_25.txt"
+file = filepath.filepath_eyeX
+
 data = np.genfromtxt(file, delimiter='|')
 
-file1 = data_dir + "/" + "g_truth.txt"
-data1 = np.genfromtxt(file1, delimiter='|')
+#file1 = data_dir + "/" + "g_truth.txt"
+file1 = filepath.filepath_pyGame
+data1 = np.genfromtxt(file1, delimiter='')
 
+data_out_dir = filepath.path_npy
+subject_count = 1
 #-------------------------------------------------------------------------------------------------------------
 
 distances = []
@@ -67,7 +76,16 @@ gazePosY_avg = data[:,GazePosition2dY]
 
 gaze_coordinates_2d = np.column_stack((gazePosX_avg,gazePosY_avg))
 
-time_stamps = data[:,Timestamp]
+gaze_coordinates_2d1 =gaze_coordinates_2d/display
+#take only in range 0 to 1    
+mask = (gaze_coordinates_2d1 >= 0) & (gaze_coordinates_2d1 <= 1)
+for i,m in enumerate(mask):
+    mask[i] = m.all()
+mask = mask[:,0]
+gaze_coordinates_2d1 =gaze_coordinates_2d1[mask]
+gaze_coordinates_2d =gaze_coordinates_2d[mask]
+
+#time_stamps = data[:,Timestamp]
 
 velocity = np.array([])
 
@@ -152,10 +170,35 @@ while(i<len(velocity_filtered)):
             count_notsaccades +=1
     i += 1
 
+#take saccades with minimn number of samples equals 10 
+temp_numSamples = saccade_indices[:,2] -saccade_indices[:,0]
+mask1 = temp_numSamples >= min_saccade_samples
+saccade_indices = saccade_indices[mask1]
 
 SaccadeIndices_allUsrs.append(saccade_indices)
 SaccadeTimeStamps_allUsrs.append(saccade_timeStamps)
 
+data_out = np.array([])
+for e in range(0,len(saccade_indices)):
+    start = int(saccade_indices[e,0])
+    end = int(saccade_indices[e,2])
+    temp_stream = gaze_coordinates_2d1[start-offset:end-offset+1]
+    temp_stream = np.hstack((temp_stream, velocity_filtered[start:end+1].reshape((temp_stream.shape[0],1))))
+    if(temp_stream.shape[0] >= num_samples_train):
+        temp_stream = temp_stream[0:num_samples_train]
+    else:
+        #this case will not come when mask applied for min saccade length
+        temp_stream = np.pad(temp_stream,((0,num_samples_train-temp_stream.shape[0]),(0,0)), 'constant',constant_values=(np.inf,))
+    temp_last = np.append(gaze_coordinates_2d1[end-offset+1],0)
+    temp_stream = np.vstack((temp_stream, temp_last))
+    temp_stream = temp_stream.reshape((1,num_samples_train+1,3))
+    if e != 0:
+        data_out = np.vstack((data_out,temp_stream))
+    else:
+        data_out = np.copy(temp_stream)
+np.save(data_out_dir+str(subject_count),data_out)
+subject_count += 1
+        
        
 print("saccades",count)     
 print("Not saccades",count_notsaccades)           
