@@ -18,12 +18,12 @@ max_y = screen_resolution[1] - offset
 
 screen = pg.display.set_mode(screen_resolution, pg.FULLSCREEN)
 #pg.display.toggle_fullscreen()
-screen_color = (255,255,255)
+screen_color = (0,0,0)
 dot_color = (255,0,0)
-line_color = (0,10,10)
-radius = 15
-thickness = 15
-length_direction = 30
+line_color = (244,220,66)
+radius = 30
+thickness = 30
+length_direction = 80
 
 try:
     f = open(r'D:\g_truth.txt','w')
@@ -42,12 +42,13 @@ def arrowline_end_point(a,b, c,d):
 def draw_arrow(screen, colour, start, end):
     radius_1 = 8
     rot_val = 120
-    pg.draw.line(screen,colour,start,end,2)
+    pg.draw.line(screen,colour,start,end,4)
     rotation = math.degrees(math.atan2(start[1]-end[1], end[0]-start[0]))+90
     pg.draw.polygon(screen, colour, ((end[0]+radius_1*math.sin(math.radians(rotation)), end[1]+radius_1*math.cos(math.radians(rotation))), (end[0]+radius_1*math.sin(math.radians(rotation-rot_val)), end[1]+radius_1*math.cos(math.radians(rotation-rot_val))), (end[0]+radius_1*math.sin(math.radians(rotation+rot_val)), end[1]+radius_1*math.cos(math.radians(rotation+rot_val)))))
    
 
 x1, y1 = random.choice(points)
+pg.mouse.set_visible(False)
 while (1):
     try:
         if time.time() - timee > 60:
